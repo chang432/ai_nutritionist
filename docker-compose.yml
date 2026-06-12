@@ -1,0 +1,56 @@
+# Two-image stack:
+#   1) ollama   — pulls & serves Qwen2.5 1.5B Instruct
+#   2) openclaw — personal AI assistant, wired to the local model, chatting over Discord
+#
+# Usage:
+#   cp .env.example .env   # then fill in the tokens
+#   docker compose up --build
+
+services:
+  ollama:
+    build:
+      context: ./ollama
+    image: ai-nutritionist/ollama-qwen:latest
+    container_name: ollama
+    environment:
+      # Model the entrypoint pulls on first boot.
+      OLLAMA_MODEL: qwen2.5:1.5b-instruct
+    ports:
+      - "11434:11434"
+    volumes:
+      # Persist downloaded models so we don't re-pull on every restart.
+      - ollama-models:/root/.ollama
+    healthcheck:
+      # Gate openclaw startup on the server actually being up.
+      test: ["CMD", "ollama", "ls"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    restart: unless-stopped
+
+  openclaw:
+    build:
+      context: ./openclaw
+    image: ai-nutritionist/openclaw:latest
+    container_name: openclaw
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      # Auth token clients present to the gateway. Required.
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:?set OPENCLAW_GATEWAY_TOKEN in .env}
+      # Discord bot token, consumed by channels.discord in openclaw.json. Required.
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:?set DISCORD_BOT_TOKEN in .env}
+      # Marks the Ollama provider as locally authorized.
+      OLLAMA_API_KEY: ollama-local
+    ports:
+      - "18789:18789"
+    volumes:
+      # Persist config + session state (seeded from the image's openclaw.json).
+      - openclaw-state:/home/node/.openclaw
+    restart: unless-stopped
+
+volumes:
+  ollama-models:
+  openclaw-state:

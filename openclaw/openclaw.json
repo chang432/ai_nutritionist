@@ -1,0 +1,47 @@
+// OpenClaw configuration (JSON5 — comments allowed).
+// Baked into the image and copied into the persistent volume on first boot.
+{
+  // --- Model provider: the local Ollama running in the `ollama` compose service ---
+  models: {
+    providers: {
+      ollama: {
+        api: "ollama",
+        // Reach the sibling service by its compose name. No `/v1` suffix:
+        // the native Ollama API gives reliable tool-calling.
+        baseUrl: "http://ollama:11434",
+        apiKey: "ollama-local",
+        models: [
+          {
+            id: "qwen2.5:1.5b-instruct",
+            name: "Qwen2.5 1.5B Instruct",
+            input: ["text"],
+          },
+        ],
+      },
+    },
+  },
+
+  // --- Default agent talks to the local Qwen model ---
+  agents: {
+    defaults: {
+      model: { primary: "ollama/qwen2.5:1.5b-instruct" },
+    },
+  },
+
+  // --- Discord chat channel ---
+  channels: {
+    discord: {
+      enabled: true,
+      // Bot token is read from the DISCORD_BOT_TOKEN environment variable
+      // (provided by docker-compose from your .env file).
+      token: { source: "env", provider: "default", id: "DISCORD_BOT_TOKEN" },
+      // Permissive defaults so chatting works out of the box. Tighten these
+      // (e.g. dmPolicy "allowlist", per-guild restrictions) for production.
+      dmPolicy: "open",
+      groupPolicy: "open",
+      // Auto-register slash commands; stream replies as they generate.
+      commands: { native: "auto" },
+      streaming: "partial",
+    },
+  },
+}
