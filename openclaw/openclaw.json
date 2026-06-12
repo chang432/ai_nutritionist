@@ -28,20 +28,19 @@
     },
   },
 
-  // --- Discord chat channel ---
+  // --- WhatsApp chat channel (WhatsApp Web / QR pairing, via Baileys) ---
   channels: {
-    discord: {
+    whatsapp: {
       enabled: true,
-      // Bot token is read from the DISCORD_BOT_TOKEN environment variable
-      // (provided by docker-compose from your .env file).
-      token: { source: "env", provider: "default", id: "DISCORD_BOT_TOKEN" },
-      // Permissive defaults so chatting works out of the box. Tighten these
-      // (e.g. dmPolicy "allowlist", per-guild restrictions) for production.
-      dmPolicy: "open",
-      groupPolicy: "open",
-      // Auto-register slash commands; stream replies as they generate.
-      commands: { native: "auto" },
-      streaming: "partial",
+      // No token: linking is QR-based. On first run, link the account with:
+      //   docker compose exec openclaw openclaw channels login --channel whatsapp
+      // Then scan the printed QR from WhatsApp on your phone (Linked Devices).
+      // Auth persists under ~/.openclaw/credentials/whatsapp/ (in the volume).
+      dmPolicy: "pairing",
+      groupPolicy: "allowlist",
+      textChunkLimit: 4000,
+      sendReadReceipts: true,
+      replyToMode: "first",
     },
   },
 }

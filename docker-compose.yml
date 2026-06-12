@@ -40,10 +40,10 @@ services:
     environment:
       # Auth token clients present to the gateway. Required.
       OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:?set OPENCLAW_GATEWAY_TOKEN in .env}
-      # Discord bot token, consumed by channels.discord in openclaw.json. Required.
-      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:?set DISCORD_BOT_TOKEN in .env}
       # Marks the Ollama provider as locally authorized.
       OLLAMA_API_KEY: ollama-local
+      # WhatsApp uses QR pairing (no token). Link it after `up` with:
+      #   docker compose exec openclaw openclaw channels login --channel whatsapp
     ports:
       - "18789:18789"
     volumes:
