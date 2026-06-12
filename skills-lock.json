@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "andre-agent-skills": {
+      "source": "chang432/andre-agent-skills",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "7ccd780a9d998a5879b7e8dfa62e548a7c848f5149055d119b598fec6ba92203"
+    }
+  }
+}
