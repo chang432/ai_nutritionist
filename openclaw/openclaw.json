@@ -1,6 +1,11 @@
 // OpenClaw configuration (JSON5 — comments allowed).
 // Baked into the image and copied into the persistent volume on first boot.
 {
+  // --- Gateway runs as a self-hosted local control plane (required) ---
+  gateway: {
+    mode: "local",
+  },
+
   // --- Model provider: the local Ollama running in the `ollama` compose service ---
   models: {
     providers: {
